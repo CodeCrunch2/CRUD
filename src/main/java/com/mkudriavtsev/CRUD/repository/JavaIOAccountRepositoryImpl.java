@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JavaIOAccountRepositoryImpl implements AccountRepository{
-    private String path = "C:\\portapps\\IdeaProjects\\CRUD\\src\\main\\java\\com\\mkudriavtsev\\CRUD\\storage\\accounts.txt";
+    private String path = "src\\main\\java\\com\\mkudriavtsev\\CRUD\\storage\\accounts.txt";
     @Override
     public void save(Account account) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(path, true))) {
-            writer.print("\r");
+            //writer.print("\r");
             writer.print(account.getId() + "," + account.getUserName() + "\r\n");
         }
         catch (IOException e) {

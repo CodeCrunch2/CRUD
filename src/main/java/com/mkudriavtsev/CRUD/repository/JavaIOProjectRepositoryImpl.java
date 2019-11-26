@@ -6,19 +6,22 @@ import main.java.com.mkudriavtsev.CRUD.model.Developer;
 import main.java.com.mkudriavtsev.CRUD.model.Project;
 import main.java.com.mkudriavtsev.CRUD.model.ProjectStatus;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class JavaIOProjectRepositoryImpl implements ProjectRepository {
-    private String path = "C:\\portapps\\IdeaProjects\\CRUD\\src\\main\\java\\com\\mkudriavtsev\\CRUD\\storage\\projects.txt";
+    private String path = "src\\main\\java\\com\\mkudriavtsev\\CRUD\\storage\\projects.txt";
     @Override
     public void save(Project project) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(path, true))) {
+            writer.print(project.getId() + ",null,null\r\n");
+        }
+        catch (IOException e) {
+            System.out.println("Ошибка ввода-вывода\n");
+        }
 
     }
 
@@ -29,32 +32,40 @@ public class JavaIOProjectRepositoryImpl implements ProjectRepository {
 
     @Override
     public void update(Project project) {
+        List<Project> projectList = getAll();
+        try (PrintWriter writer = new PrintWriter(new FileWriter(path))) {
+            if (!projectList.isEmpty()) {
+                for (Project p: projectList) {
+                    if (p.getId() != project.getId()) writer.print(toStorageString(p) + "\r\n");
+                    else writer.print(toStorageString(project) + "\r\n");
+                }
+            }
+        }
+        catch (IOException e) {
+            System.out.println("Ошибка ввода-вывода\n");
+        }
 
     }
 
     @Override
     public Long getNextID() {
-        return null;
+        List<Project> projectList = getAll();
+        if (projectList.isEmpty()) return 0L;
+        else return projectList.get(projectList.size()-1).getId() +1L;
     }
 
     @Override
     public List<Project> getAll() {
         List<Project> projectList = new ArrayList<>();
-        Set<Developer> developerSet = new HashSet<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             while (reader.ready()) {
                 String [] strArr = reader.readLine().split(",");
-
-                for (int i = 1; i < (strArr.length-1); i++) {
-                    if(!strArr[i].equals("null")) developerSet.add(new DeveloperController().getByID(strArr[i]));
-                }
-
-                if(developerSet.isEmpty() & strArr[strArr.length-1].equals("null")) {
-                    projectList.add(new Project(Long.parseLong(strArr[0]),null, null));
-                }
-                else if(developerSet.isEmpty()) projectList.add(new Project(Long.parseLong(strArr[0]),null, ProjectStatus.valueOf(strArr[strArr.length-1])));
-                else if(strArr[strArr.length-1].equals("null")) projectList.add(new Project(Long.parseLong(strArr[0]),developerSet, null));
-                else projectList.add(new Project(Long.parseLong(strArr[0]),null, ProjectStatus.valueOf(strArr[strArr.length-1])));
+                Set<Developer> developerSet = getDevelopersSet(strArr);
+                ProjectStatus projectStatus;
+                Long id = Long.parseLong(strArr[0]);
+                if(strArr[strArr.length-1].equals("null")) projectStatus = null;
+                else projectStatus = ProjectStatus.valueOf(strArr[strArr.length-1]);
+                projectList.add(new Project(id, developerSet, projectStatus));
             }
         }
         catch (FileNotFoundException e) {
@@ -69,4 +80,25 @@ public class JavaIOProjectRepositoryImpl implements ProjectRepository {
         return projectList;
 
     }
+    public Set<Developer> getDevelopersSet(String[] strArr) throws DeveloperNotExistException {
+        Set<Developer> developerSet = new HashSet<>();
+        for (int i = 1; i < strArr.length - 1; i++) {
+            if(!strArr[i].equals("null")) developerSet.add(new DeveloperController().getByID(strArr[i]));
+        }
+        return developerSet;
+    }
+    public String toStorageString(Project project){
+        StringBuffer sb = new StringBuffer();
+        sb.append(project.getId());
+        sb.append(",");
+        if (project.getDevelopers().isEmpty()) sb.append("null,");
+        else {
+            for(Developer developer: project.getDevelopers()) sb.append(developer.getId()).append(",");
+        }
+        if (project.getProjectStatus() == null) sb.append("null");
+        else sb.append (project.getProjectStatus());
+        return sb.toString();
+
+    }
+
 }

@@ -41,7 +41,8 @@ public class DeveloperController {
     public void deleteDeveloper(String idString) throws DeveloperNotExistException, NumberFormatException {
         javaIODeveloperRepository.delete(getByID(idString));
     }
-    public void setAccount(String idDeveloper, String idAccount) throws AccountNotExistException, NumberFormatException, DeveloperNotExistException {
+    public void setAccount(String idDeveloper, String idAccount) throws AccountNotExistException,
+            NumberFormatException, DeveloperNotExistException {
         Account account = new AccountController().getByID(idAccount);
         Developer developer = getByID(idDeveloper);
         developer.setAccount(account);

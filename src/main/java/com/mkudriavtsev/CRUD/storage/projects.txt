@@ -1,3 +1,7 @@
-1,1,2,ACTIVE
+1,1,2,4,ACTIVE
 2,1,FINISHED
 3,null,null
+4,null,null
+5,null,null
+6,null,DELETED
+7,null,DELETED

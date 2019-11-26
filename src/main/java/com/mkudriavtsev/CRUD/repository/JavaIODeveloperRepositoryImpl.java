@@ -9,10 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JavaIODeveloperRepositoryImpl implements DeveloperRepository{
-    private String path = "C:\\portapps\\IdeaProjects\\CRUD\\src\\main\\java\\com\\mkudriavtsev\\CRUD\\storage\\developers.txt";
+    private String path = "src\\main\\java\\com\\mkudriavtsev\\CRUD\\storage\\developers.txt";
     @Override
     public void save(Developer developer) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(path, true))) {
+            //writer.print("\r");
             if (developer.getAccount() == null) writer.print(developer.getId() + ",null\r\n");
             else writer.print(developer.getId() + "," + developer.getAccount().getId() + "\r\n");
         }
